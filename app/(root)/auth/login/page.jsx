@@ -24,9 +24,11 @@ import { FaRegEye } from 'react-icons/fa6'
 import { FORGOT_PASSWORD_ROUTE, REGISTER_ROUTE } from '@/routes/websiteRoutes'
 import axios from 'axios'
 import { showToast } from '@/lib/showToast'
+import OTPVerification from '@/components/Application/OTPVerification'
 
 function Login() {
   const [loading, setLoading] = useState(false)
+  const [otpVerificationLoading, setOtpVerificationLoading] = useState(false)
   const [isTypePassword, setTypePassword] = useState(true)
   const [otpEmail, setOtpEmail] = useState()
   const formSchema = zSchema.pick({
@@ -57,6 +59,23 @@ function Login() {
       setLoading(false)
     }
   }
+  //otp verification handler
+  const handleOtpVerification = async (values) => {
+    console.log("OTP Verification Values:", values)
+    try {
+      setOtpVerificationLoading(true)
+      const { data: otpVerificationResponse } = await axios.post("/api/auth/verify-otp", values)
+      if (!otpVerificationResponse.success) {
+        throw new Error(otpVerificationResponse.message)
+      }
+      setOtpEmail('')
+      showToast(otpVerificationResponse.message, "success")
+    } catch (error) {
+      showToast(error.message || "Failed to verify OTP", "error")
+    } finally {
+      setOtpVerificationLoading(false)
+    }
+  }
   return (
     <Card className='w-[400px]'>
       <CardContent>
@@ -65,80 +84,77 @@ function Login() {
         </div>
         {
           !otpEmail ? <>
-        <div className='text-center'>
-          <h1 className='tex-4xl font-bold'>Login Into Account</h1>
-          <p>Login into your account by filling out the form below</p>
-        </div>
-        <div className='mt-6 mb-6'>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className='text-center'>
+              <h1 className='tex-4xl font-bold'>Login Into Account</h1>
+              <p>Login into your account by filling out the form below</p>
+            </div>
+            <div className='mt-6 mb-6'>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
-              <div className='mb-3'>
-                {/* Email Field */}
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input type='email' placeholder="example@email.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                  <div className='mb-3'>
+                    {/* Email Field */}
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input type='email' placeholder="example@email.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-              <div className='mb-3'>
-                {/* Password Field */}
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <div className='relative'>
-                          <Input
-                            type={isTypePassword ? "password" : "text"}
-                            placeholder="••••••••"
-                            {...field}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setTypePassword(!isTypePassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
-                          >
-                            {isTypePassword ? <FaRegEyeSlash /> : <FaRegEye />}
-                          </button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                  <div className='mb-3'>
+                    {/* Password Field */}
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl>
+                            <div className='relative'>
+                              <Input
+                                type={isTypePassword ? "password" : "text"}
+                                placeholder="••••••••"
+                                {...field}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setTypePassword(!isTypePassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                              >
+                                {isTypePassword ? <FaRegEyeSlash /> : <FaRegEye />}
+                              </button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-              <ButtonLoading
-                type="submit"
-                text="Login"
-                loading={loading}
-                className={'w-full cursor-pointer'}
-                onClick={form.handleSubmit(onSubmit)}
-              />
+                  <ButtonLoading
+                    type="submit"
+                    text="Login"
+                    loading={loading}
+                    className={'w-full cursor-pointer'}
+                    onClick={form.handleSubmit(onSubmit)}
+                  />
 
-            </form>
-          </Form>
-        </div>
-        <div className='text-center'>
-          <p>Don't have an account? <Link href={REGISTER_ROUTE} className="text-blue-500 hover:underline">Create Account</Link></p>
-          <Link href={FORGOT_PASSWORD_ROUTE} className="text-blue-500 hover:underline">Forgot Password?</Link>
-        </div>
-          </> : <div className='text-center'>
-            <h1 className='tex-4xl font-bold'>OTP Sent to {otpEmail}</h1>
-            <p>Please check your email for the OTP to complete login</p>
-          </div>
+                </form>
+              </Form>
+            </div>
+            <div className='text-center'>
+              <p>Don't have an account? <Link href={REGISTER_ROUTE} className="text-blue-500 hover:underline">Create Account</Link></p>
+              <Link href={FORGOT_PASSWORD_ROUTE} className="text-blue-500 hover:underline">Forgot Password?</Link>
+            </div>
+          </> : <OTPVerification email={otpEmail} loading={otpVerificationLoading} onSubmit={handleOtpVerification} />
         }
       </CardContent>
     </Card>
