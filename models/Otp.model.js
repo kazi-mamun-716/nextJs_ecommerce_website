@@ -19,5 +19,5 @@ const otpSchema = new mongoose.Schema({
 //after expiration, the document will be automatically removed from the collection
 otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-const OTPModel = mongoose.model.OTP || mongoose.model("OTP", otpSchema, "otps");
+const OTPModel = mongoose.models.OTP || mongoose.model("OTP", otpSchema, "otps");
 export default OTPModel;

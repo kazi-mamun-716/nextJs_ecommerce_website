@@ -1,5 +1,6 @@
 import { emailVerificationLink } from "@/email/emailVerificationLink";
 import { otpEmail } from "@/email/otpEmail";
+import { connectToDatabase } from "@/lib/dbConnection";
 import { response } from "@/lib/helperFunction";
 import { sendMail } from "@/lib/sendMail";
 import { zSchema } from "@/lib/zodSchema";
@@ -10,8 +11,8 @@ import { z } from "zod";
 
 export async function POST(request) {
     try {
+        await connectToDatabase();
         const { email, password } = await request.json();
-        console.log("Login attempt with email:", email, password);
         const validationSchema = zSchema.pick({
             email: true,
         }).extend({
@@ -21,7 +22,7 @@ export async function POST(request) {
         if (!validateData.success) {
             return response(false, 400, "Invalid email or password", validateData.error);
         }
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ deletedAt: null, email }).select("+password");
         console.log("User found:", user);
         if (!user) {
             return response(false, 401, "Invalid email or password", { status: 401 });

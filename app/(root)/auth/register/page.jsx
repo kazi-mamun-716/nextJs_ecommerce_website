@@ -23,6 +23,7 @@ import { FaRegEye } from 'react-icons/fa6'
 import { LOGIN_ROUTE } from '@/routes/websiteRoutes'
 import { catchError } from '@/lib/helperFunction'
 import axios from 'axios'
+import { showToast } from '@/lib/showToast'
 
 const Register = () => {
     const [loading, setLoading] = useState(false)
@@ -48,7 +49,6 @@ const Register = () => {
         },
     })
     const onSubmit = async (values) => {
-        console.log(values)
         try {
             setLoading(true)
             const {data: registerResponse} = await axios.post("/api/auth/register", values)
@@ -56,9 +56,9 @@ const Register = () => {
                 throw new Error(registerResponse.message)
             }
             form.reset()
-            alert(registerResponse.message)
+            showToast(registerResponse.message, "success")
         } catch (error) {
-            alert(error.message || "Failed to register user")
+            showToast(error.message || "Failed to register user", "error")
         } finally {
             setLoading(false)
         }

@@ -1,5 +1,6 @@
 import { Assistant } from "next/font/google";
 import "./globals.css";
+import { ToastContainer } from "react-toastify";
 
 const assistantFont = Assistant({
   subsets: ["latin"],
@@ -20,6 +21,7 @@ export default function RootLayout({ children }) {
         className={`${assistantFont.className} antialiased`}
       >
         {children}
+        <ToastContainer />
       </body>
     </html>
   );
