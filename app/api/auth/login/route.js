@@ -46,6 +46,7 @@ export async function POST(request) {
         //otp generation
         await OTPModel.deleteMany({ email });
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        // console.log("Generated OTP:", otp);
         await OTPModel.create({ email, otp });
         const otpEmailStatus = await sendMail(email, 'Your OTP for Ecommerce App Login', otpEmail(otp));
         if (!otpEmailStatus.success) {

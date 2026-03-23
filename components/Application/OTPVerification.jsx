@@ -1,14 +1,16 @@
 import { zSchema } from '@/lib/zodSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import ButtonLoading from './ButtonLoading'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form'
-import { Input } from '../ui/input'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '../ui/input-otp'
 import { REGEXP_ONLY_DIGITS } from 'input-otp'
+import axios from 'axios'
+import { showToast } from '@/lib/showToast'
 
 const OTPVerification = ({ email, onSubmit, loading }) => {
+    const [isResendingOtp, setIsResendingOtp] = useState(false);
     const formSchema = zSchema.pick({
         otp: true, email: true
     })
@@ -20,6 +22,20 @@ const OTPVerification = ({ email, onSubmit, loading }) => {
     })
     const handleOtpVerification = async (values) => {
         onSubmit(values)
+    }
+    const resendOTP = async () => {
+        try {
+            setIsResendingOtp(true)
+            const { data: otpSendingResponse } = await axios.post("/api/auth/resend-otp",{ email })
+            if (!otpSendingResponse.success) {
+                throw new Error(otpSendingResponse.message)
+            }
+            showToast(otpSendingResponse.message, "success")
+        } catch (error) {
+            showToast(error.message || "Failed to resend OTP", "error")
+        } finally {
+            setIsResendingOtp(false)
+        }
     }
     return (
         <div>
@@ -64,9 +80,11 @@ const OTPVerification = ({ email, onSubmit, loading }) => {
                             onClick={form.handleSubmit(onSubmit)}
                         />
                         <div className="text-center">
-                            <button type='button' className='text-blue-500 hover:underline cursor-pointer mt-3' onClick={form.handleSubmit(onSubmit)}>
+                            {
+                                !isResendingOtp?<button  type='button' className='text-blue-500 hover:underline cursor-pointer mt-3' onClick={resendOTP}>
                                 Resend OTP
-                            </button>
+                            </button>:<span className='text-md'>Resending.....</span>
+                            }
                         </div>
 
                     </div>
