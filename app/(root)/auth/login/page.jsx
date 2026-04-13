@@ -21,7 +21,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { FaRegEyeSlash } from 'react-icons/fa'
 import { FaRegEye } from 'react-icons/fa6'
-import { FORGOT_PASSWORD_ROUTE, REGISTER_ROUTE } from '@/routes/websiteRoutes'
+import { REGISTER_ROUTE, RESET_PASSWORD_ROUTE } from '@/routes/websiteRoutes'
 import axios from 'axios'
 import { showToast } from '@/lib/showToast'
 import OTPVerification from '@/components/Application/OTPVerification'
@@ -64,7 +64,6 @@ function Login() {
   }
   //otp verification handler
   const handleOtpVerification = async (values) => {
-    console.log("OTP Verification Values:", values)
     try {
       setOtpVerificationLoading(true)
       const { data: otpVerificationResponse } = await axios.post("/api/auth/verify-otp", values)
@@ -157,7 +156,7 @@ function Login() {
             </div>
             <div className='text-center'>
               <p>Don't have an account? <Link href={REGISTER_ROUTE} className="text-blue-500 hover:underline">Create Account</Link></p>
-              <Link href={FORGOT_PASSWORD_ROUTE} className="text-blue-500 hover:underline">Forgot Password?</Link>
+              <Link href={RESET_PASSWORD_ROUTE} className="text-blue-500 hover:underline">Forgot Password?</Link>
             </div>
           </> : <OTPVerification email={otpEmail} loading={otpVerificationLoading} onSubmit={handleOtpVerification} />
         }
