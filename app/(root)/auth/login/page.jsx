@@ -25,8 +25,11 @@ import { FORGOT_PASSWORD_ROUTE, REGISTER_ROUTE } from '@/routes/websiteRoutes'
 import axios from 'axios'
 import { showToast } from '@/lib/showToast'
 import OTPVerification from '@/components/Application/OTPVerification'
+import { useDispatch } from 'react-redux'
+import { login } from '@/store/reducer/authReducer'
 
 function Login() {
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false)
   const [otpVerificationLoading, setOtpVerificationLoading] = useState(false)
   const [isTypePassword, setTypePassword] = useState(true)
@@ -70,6 +73,8 @@ function Login() {
       }
       setOtpEmail('')
       showToast(otpVerificationResponse.message, "success")
+
+      dispatch(login(otpVerificationResponse.data.user)) // Update Redux store with user data
     } catch (error) {
       showToast(error.message || "Failed to verify OTP", "error")
     } finally {
